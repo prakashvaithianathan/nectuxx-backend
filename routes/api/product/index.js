@@ -45,6 +45,8 @@ router.put('/update/:id',async(req,res)=>{
 })
 
 
+
+
 router.delete('/delete/:id',async(req,res)=>{
     try {
         const deleted = await productModel.deleteOne({_id:req.params.id})
@@ -53,5 +55,66 @@ router.delete('/delete/:id',async(req,res)=>{
         res.json({message:error.message})
     }
 })
+
+
+
+router.get("/filter",async(req,res)=>{
+    try {
+       
+        const user=await productModel.find({},{name:1,_id:0,price:1,SKU:1});
+       
+        return res.json(user)
+    } catch (error) {
+       return res.json ({msg:error.message});
+    }
+})
+
+
+router.get("/sort",async(req,res)=>{
+    try {        
+        const data=await productModel.find().sort({price:1});
+        return res.json(data);
+    } catch (error) {
+        return res.json({msg:error.message})
+        
+    }
+});
+
+router.get("/aggregate/:category/:price1-:price2",async(req,res)=>{
+    try {        
+        const data=await productModel.find(
+        {category:req.params.category,
+           
+            price:{$gte:req.params.price1,$lte:req.params.price2}})
+            .sort({price:1})
+    
+        return res.json(data);
+    } catch (error) {
+        return res.json({msg:error.message});
+        
+    }
+});
+
+
+
+router.get("/:name",async(req,res)=>{
+    try {
+        const user=await productModel.find({name:{"$regex":req.params.name}});
+       
+       return res.status(200).json(user)
+    } catch (error) {
+       return res.json ({msg:error.message});
+    }
+})
+   
+// router.get("/all/products",async(req,res)=>{
+//     try {
+//         const user=await Product.find({name:{$regex:"f"}}).populate.select("-__v -_id  -createdAt -updatedAt");
+//         res.json("");
+//     } catch (error) {
+//          res.json(error); 
+//     }
+//    ;
+// });
 
 module.exports = router
